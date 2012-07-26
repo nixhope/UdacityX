@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <link type="text/css" rel="stylesheet" href="/static/main.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+    <title>{% block title %}Home{% endblock %} - Udacity Plus</title>
+    {% block head %}	
+    {% endblock %}    
+</head>
+
+<body>
+<div class="content"><div class="main-title"><h1>Udacity Plus</h1></div>{% block content %}
+<script type="text/javascript">
+$(document).ready(function(){
+    jQuery("a#show-screenshot").click(function(event){
+        event.preventDefault();
+        jQuery("div#image-hider").toggle();
+    });    
+});
+</script>
+<h3>What is Udacity Plus?</h3>
+<p>Good question, Neo.<br/>
+Udacity Plus is a third party Grease Monkey userscript plugin that provides extra functionality for the <a href="http://en.wikipedia.org/wiki/Massive_open_online_course" title="Massive Open Online Course">MOOC</a> website <a href="http://www.udacity.com">Udacity</a>.</p>
+
+<h3>What kind of extra functionality?</h3>
+<p>Currently it offers an article link at the top of the page where you can read student articles.</p>
+<p>This feature will soon be enhanced for greater usability.</p>
+<p><a id="show-screenshot" href="">Click to show screenshot</a>.</p>
+<div id="image-hider"><img src="static/udacity_plus_screenshot.png" width="620" height="440"></div>
+
+<h3>That's it?</h3>
+<p>Well, it's the future that's interesting. There will be extra tabs with bonus material for select lecture videos. And hopefully a space to take your own notes.</p>
+<p>There will also be extra buttons so you can nominate forum posts to be added to the article collection.</p>
+<p>You might also be interested in <a href="http://userscripts.org/scripts/show/137986">this userscript</a> which adds related questions below the videos.</p>
+
+<h3>Fine, let me try it</h3>
+<p>You'll need Firefox and GreaseMonkey, although soon Chrome will be supported as well. Click the green button to install.</p>
+<div id='install_script'><a href="/static/udacityplus.user.js" title="Install Udacity Plus" class="install_button">Install</a></div>
+
+<h3>Why does your site look so terrible? Even blind people hate it!</h3>
+<p>Because I have the design skills of a dead start-nosed mole and I write HTML/CSS in a text editor to boot. If you think you can do better and/or you want to help, flick me an email: darksentinel@gmail.com</p>
+<p>&nbsp;</p>
+{% endblock %}
+</div>
+</body>
+
+</html>

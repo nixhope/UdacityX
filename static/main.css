@@ -6,12 +6,12 @@ body {
     width: 800px;
     margin: 0 auto;
     padding: 10px;
-    //color: #333;
+    /*color: #333;*/
 }
 
 .main-title {
     display: block;
-    //color: #222;
+    /*color: #222;*/
 	margin-top: 10px;
     font-weight: bold;
     text-align: center;
@@ -45,7 +45,7 @@ a.install_button {
 	display: block; 
 	text-align: center; 
 	color: #004; 
-	background: #bae37f url(/images/sprite.png?2) right -130px no-repeat; 
+	background: #bae37f; 
 	-moz-border-radius: 5px; 
 	-webkit-border-radius: 5px; 
 }

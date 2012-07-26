@@ -1,0 +1,32 @@
+memcache.set(key, val) # val can be any pickleable object
+memcache.get(key) -> val
+memcache.delete(key)
+memcache.gets(key) - > (val, unique)
+memcache.cas(key, value, unique) -> True/False
+
+r = memcache.cas(k, y, u)
+while r == False:
+    (v, u) = memcache.gets(k)
+    r = memcache.cas(k, y, u)
+# Use for destructive operations
+
+
+gettext python
+
+
+WHERE ANCESTOR IS :1
+
+
+Speed up requests:
+- Load only the code needed for startup.
+- Access the disk as little as possible.
+- In some cases, loading code from a zip or jar file is faster than     loading from many separate files.
+- Implement caching: page views should never hit db
+- Simple users, including bots, should not hit db
+- Database write also updates the cache (complex inserts)
+http://forums.udacity.com/cs253/questions/28320/frontend-instance-hours
+
+
+memcache users
+
+

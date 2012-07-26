@@ -1,0 +1,28 @@
+application: udacityplus
+version: 1
+runtime: python27
+api_version: 1
+threadsafe: true
+
+default_expiration: "7d"
+
+libraries:
+- name: jinja2
+  version: latest
+  
+builtins:
+- appstats: on
+
+handlers:
+- url: /static
+  static_dir: static
+  expiration: "1d 0m"
+  
+- url: /static/udacityplus.user.js
+  static_files: static/udacityplus.user.js
+  upload: static/udacityplus.user.js
+  expiration: "1d 0m"
+
+- url: /.*
+  secure: always
+  script: main.app

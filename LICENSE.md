@@ -1,5 +1,6 @@
 ##License
 Released under the MIT (Expat) license:
+
 Copyright (C) 2012 Jin Koo Niersbach
 
 Permission is hereby granted, free of charge, to any person obtaining

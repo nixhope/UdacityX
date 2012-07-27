@@ -16,7 +16,12 @@ builtins:
 handlers:
 - url: /static
   static_dir: static
-  expiration: "1d 0m"
+  expiration: "0d 0m"
+  
+  
+- url: /robots.txt
+  static_files: static/robots.txt
+  upload: static/robots.txt
   
 - url: /static/udacityplus.user.js
   static_files: static/udacityplus.user.js

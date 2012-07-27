@@ -1,27 +1,25 @@
 // ==UserScript==
 
-// @name          Udacity Plus Viewer
+// @name          Udacity Plus
 
-// @namespace     http://udacityplus.appspot.com
+// @namespace     https://udacityplus.appspot.com
 
 // @description   Enhances Udacity lessons
 
-// @include       http*://udacityplus.appspot.com/*
-// @include       http*://*.udacity.com/*
-// @include       http*://udacity.com/*
+// @match       http*://udacityplus.appspot.com/*
+// @match       http*://*.udacity.com/*
+// @match       http*://udacity.com/*
 
 // @require       http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js
 
 // @download      https://udacityplus.appspot.com/static/udacityplus.user.js
 
-// @version       0.0.1027
+// @version       0.1.1011
 
 // ==/UserScript==
 
-// Looking at the source code there is already a bunch of material there
+// Looking at the udacity.com html code there is already a bunch of material there
 // that was removed for launch
-
-// @require http://courses.ischool.berkeley.edu/i290-4/f09/resources/gm_jq_xhr.js 
 
 var path = window.location // full url
 var host = window.location.host // subdomain.domain.tld
@@ -41,29 +39,16 @@ GM_addStyle("div.udacity-plus#article-overlay {"+
     "a.udacity-plus-link {padding: 0px; border: none;} ");  
 
 // Put content into the article overlay
-/* Because from GreaseMonkey we can't access the jsonp returned, we have to do something special.
-If we have control of the structure of the API, we canget the API to return code (instead of JSON)
-which can then be executed on the default DOM. It won't have access to any of the custom elements
-or functions of this script because they are sandboxed. To obtain information we can *insert it
-elsewhere* and then *steal it with our script* 
-*/
-
-jQuery.ajax({
-    dataType: "jsonp",
-    //url: "http://ds-ex.codemonki.es/jsonp",
-    url: "https://udacityplus.appspot.com/api/articles/get",
-    data: {fn: 'var head = document.getElementsByTagName("head")[0]; '+ 
-    'head.innerHTML += \'<ninjatag id="udacityplus">content</ninjatag>\''},
-    // The remote API will add the content
-    success: function(data) {},
-    error: function(data){
-        var ninjatag = jQuery("ninjatag#udacityplus")
-        var content = ninjatag.html();
-        jQuery("div.udacity-plus#article-overlay").append(content);
+GM_xmlhttpRequest({
+    method: "GET",
+    url: "https://udacityplus.appspot.com/api/articles/get?fn=content",
+    onload: function(response) {        
+        var content = response.responseText;
+        jQuery("div.udacity-plus#article-overlay").html(content);
         article_overlay_html = '<div class="udacity-plus" id="article-overlay">'+content+'</div>';
-        ninjatag.remove(); // Or was it never there to begin with?
     }
 });
+    
 
 jQuery(document).mouseup(function (event) {
     var container = jQuery("div.udacity-plus#article-overlay");

@@ -14,7 +14,7 @@
 
 // @download      https://udacityplus.appspot.com/static/udacityplus.user.js
 
-// @version       0.1.1011
+// @version       0.1.1027
 
 // ==/UserScript==
 
@@ -38,17 +38,47 @@ GM_addStyle("div.udacity-plus#article-overlay {"+
     "span.udacity-plus-score {color: #1C78AA; font-weight:bold;} "+
     "a.udacity-plus-link {padding: 0px; border: none;} ");  
 
-// Put content into the article overlay
-GM_xmlhttpRequest({
-    method: "GET",
-    url: "https://udacityplus.appspot.com/api/articles/get?fn=content",
-    onload: function(response) {        
-        var content = response.responseText;
-        jQuery("div.udacity-plus#article-overlay").html(content);
-        article_overlay_html = '<div class="udacity-plus" id="article-overlay">'+content+'</div>';
+// Function to set the content, both in the overlay, if already created,
+// and in the overlay filler html
+var setContent = function(content) {
+    if (typeof content !== "string") {
+        content = "<p>An error occurred retrieving the articles."+
+        "Please try again or contact the Udacity Plus author</p>";
     }
-});
-    
+    article_overlay_html = '<div class="udacity-plus" id="article-overlay">'+content+'</div>';
+    jQuery("div.udacity-plus#article-overlay").html(content);    
+}
+
+// Articles should be cached for an hour
+// Get content (via ajax or from storage) and put it into the article overlay
+var retrieval = GM_getValue('udacity plus articles', false);
+if (retrieval) {
+    try {
+        var asJSON = JSON.parse(retrieval);
+        if ((asJSON["timestamp"] + 3600*1000) < new Date().getTime()) {
+            // Cache expires after 1 hour
+            retrieval = false;
+        } else {
+            setContent(asJSON["content"]);
+        }
+    } catch(e) {
+        // In case **** happens, e.g. corrupted cache
+        retrieval = false;
+    }    
+}    
+if (!retrieval && host.indexOf("udacity.com") != -1) {
+    // Retrieve data via XHR
+    GM_xmlhttpRequest({
+        method: "GET",
+        url: "https://udacityplus.appspot.com/api/articles/get?fn=content",
+        onload: function(response) {        
+            var content = response.responseText;
+            var storage = {"content": content, "timestamp": new Date().getTime()};
+            GM_setValue('udacity plus articles', JSON.stringify(storage));
+            setContent(content);
+        }
+    });
+}		
 
 jQuery(document).mouseup(function (event) {
     var container = jQuery("div.udacity-plus#article-overlay");
@@ -57,16 +87,15 @@ jQuery(document).mouseup(function (event) {
     }
 });
 
-
 // Wait for everything to be loaded
 window.addEventListener("load", function(e) {    
-    // udacityplus.appspot.com:
+    // Site is udacityplus.appspot.com:
     if (host.indexOf("udacityplus.appspot.com") != -1) {
         jQuery("a.install_button").html("Udacity Plus is already installed!");
         jQuery("div#install_script").removeAttr("id");
     }
     
-    //Udacity.com stuff:
+    // Site is udacity.com:
     if (host.indexOf("udacity.com") != -1) {        
         // Make the U+ additions more obvious
         GM_addStyle("li.udacity-plus {border: solid 1px #1C78AA;}");  

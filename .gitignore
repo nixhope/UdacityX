@@ -1,0 +1,6 @@
+# Ignoring the following: #
+###################
+*.pyc
+bcrypt
+appengine_config.*
+todo.*

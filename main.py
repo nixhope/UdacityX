@@ -1,10 +1,12 @@
 import webapp2
 import re
+import logging
 
 from google.appengine.ext import db
 from google.appengine.api import users, memcache
 from handler import Handler, ErrorHandler, SlashRedirect
 import articles
+import api
 
 def validate_cookie():
     '''validate using s|HMAC(secret, s)'''
@@ -16,8 +18,9 @@ def validate_password():
 
 class Main(Handler):
     def get(self):
-        if 'main' not in self.request.url:
-            self.redirect('/main')
+        logging.debug('%s'%self.request)
+        if 'main' in self.request.url:
+            self.redirect('/')
         self.render('base.html')
 
 # Define which urls to handle and how
@@ -27,7 +30,9 @@ app = webapp2.WSGIApplication([
         ('(.*)//+', SlashRedirect), #Strip multiple trailing slashes
         ('/', Main),
         ('/main', Main),
-        ('/api/articles/get', articles.GetArticles),
-        ('/api/articles/test', articles.GetTest),
+        ('/api/articles/get', api.GetArticles),
+        ('/api/articles/upvote', api.UpVote),
+        ('/api/articles/devote', api.DeVote),
+        ('/votes', articles.ListVotes), # Testing only
         ('/(.*)', ErrorHandler)
         ], debug=True)

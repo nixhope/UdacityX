@@ -15,7 +15,15 @@
 $(document).ready(function(){
     jQuery("a#show-screenshot").click(function(event){
         event.preventDefault();
-        jQuery("div#image-hider").toggle();
+	jQuery("a#show-screenshot").hide();
+        jQuery("div#image-hider").show();
+	jQuery("a#hide-screenshot").show();
+    });    
+    jQuery("a#hide-screenshot").click(function(event){
+        event.preventDefault();
+	jQuery("a#hide-screenshot").hide();
+        jQuery("div#image-hider").hide();
+	jQuery("a#show-screenshot").show();
     });    
 });
 </script>
@@ -25,14 +33,17 @@ Udacity Plus is a third party userscript that provides extra functionality for t
 
 <h3>What kind of extra functionality?</h3>
 <p>Currently it offers an article link at the top of the page where you can read student articles.</p>
-<p>This feature will soon be enhanced for greater usability.</p>
-<p><a id="show-screenshot" href="">Click to show screenshot</a>.</p>
-<div id="image-hider"><img src="static/udacity_plus_screenshot.png" width="620" height="440"></div>
+<p>It also creates extra buttons on the Udacity forums to allow you to upvote specific questions and answers to nominate them to article status.</p>
+<p><a id="show-screenshot" href="">Click to show screenshots</a><a id="hide-screenshot" href="">Click to hide screenshots</a>.</p>
+<div id="image-hider"><p>Screenshot #1:<br/><img src="static/udacity_plus_screenshot.png" width="620" height="440"><br/>This image shows the article overlay.
+Articles will be dynamically produced based on community upvotes.</p><hr/>
+<p>Screenshot #2:<br/><img src="static/udacity_plus_screenshot2.png" width="620" height="352"><br/>
+This image shows the U+ upvote button which the script adds to the forums.</p><hr/>
+<p>Screenshot #3:<br/><img src="static/udacity_plus_screenshot3.png" width="620" height="354"><br/>
+This image shows the clicked upvote button. Upvotes are collated and form the basis of the articles shown users.</div>
 
 <h3>That's it?</h3>
 <p>Well, it's the future that's interesting. There will be extra tabs with bonus material for select lecture videos. And hopefully a space to take your own notes.</p>
-<p>There will also be extra buttons so you can nominate forum posts to be added to the article collection.</p>
-<p>You might also be interested in <a href="http://userscripts.org/scripts/show/137986">this userscript</a> which adds related questions below the videos.</p>
 
 <h3>Fine, let me try it</h3>
 <p>You'll need Firefox with the GreaseMonkey extension, or Chrome with the Tampermonkey extension. Click the green button to install.</p>
@@ -40,6 +51,25 @@ Udacity Plus is a third party userscript that provides extra functionality for t
 
 <h3>Why does your site look so terrible? Even blind people hate it!</h3>
 <p>Because I have the design skills of a dead start-nosed mole and I write HTML/CSS in a text editor to boot. If you think you can do better and/or you want to help, flick me an email: darksentinel@gmail.com</p>
+
+<h3>Planned/potential features:</h3>
+<ul>
+	<li>(Customisable) quick links at the top of the page. Will probably link to pages in the Udacity Wiki. Examples:</li>
+	<ul>
+		<li>Student projects (sites/apps created by Udacians)</li>
+		<li>HOWTOs</li>
+		<li>Articles</li>
+		<li>Hot topics</li>
+	</ul>
+	<li>Extra tabs for class videos:</li>
+	<ul>
+		<li>Supplementary material</li>
+		<li>Discussions</li>
+		<li>Space to take notes</li>
+	</ul>
+	<li>Integration with other projects</li>
+</ul>
+
 <p>&nbsp;</p>
 {% endblock %}
 </div>

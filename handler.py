@@ -13,7 +13,7 @@ class Handler(webapp2.RequestHandler):
     
     def write(self, *a, **kw):
         '''Writes directly to the http request'''
-        logging.debug("%s: %s\n%s" % ('ip', self.request.remote_addr, self.request))
+        #logging.debug("%s: %s\n%s" % ('ip', self.request.remote_addr, self.request))
         self.response.out.write(*a, **kw)
         
     def render_str(self, template, **params):

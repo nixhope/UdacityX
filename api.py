@@ -1,4 +1,3 @@
-import webapp2
 import sys
 import json
 import logging
@@ -6,6 +5,7 @@ import logging
 from google.appengine.ext import db
 from google.appengine.api import memcache
 from handler import Handler
+import webapp2
 
 import authentication
 import articles

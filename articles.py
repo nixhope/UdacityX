@@ -1,4 +1,3 @@
-import webapp2
 import sys
 import json
 import time
@@ -7,6 +6,7 @@ import logging
 from google.appengine.ext import db
 from google.appengine.api import memcache
 from handler import Handler
+import webapp2
 
 import authentication
 
@@ -71,6 +71,7 @@ def new_vote(link):
     return vote
     
 class Vote(db.Model):
+    # Each link (URL) is associated with at most one Vote object
     # link is key_name()
     score = db.IntegerProperty(required=False, indexed=True)
     history = db.TextProperty(required=False) # Forward compatible, hopefully 

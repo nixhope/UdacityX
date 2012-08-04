@@ -7,6 +7,7 @@ from google.appengine.api import memcache
 
 def get_user(hashed_id):
     '''Returns a User object, or None if the user is not authenticated'''
+    # Format for hashed_id is '%s|%s'(%id, %hash)
     (id_, hexhash) = hashed_id.split('|')
     if id_.isdigit() and check_hash(id_, hexhash):
         key = memcache_key(id_)
@@ -57,17 +58,20 @@ class User(db.Model):
         self.put()
         memcache.set(memcache_key(self.key().id()), self)
     def get_settings(self):
+        # Settings is a dict, stored as a JSON string
         if self.settings:
             return json.loads(self.settings)
         else:
             return {}
     def change_settings(self, key, value):
+        # Adds key, value to the settings dict and stores as JSON string
         settings = self.get_settings()
         settings[key] = value
         self.settings = json.dumps(settings)
         self.store()
         logging.debug("DATASTORE: Updated user with id = %d"%self.key().id())
-    def blackmark(self):
+    def blackmark(self, count = 1):
         '''Increases the blackcount'''
-        self.blackcount = self.blackcount + 1 if self.blackcount else 1
+        # Blackmarks indicate illegal actions
+        self.blackcount = self.blackcount + count if self.blackcount else count
         

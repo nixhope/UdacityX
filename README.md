@@ -19,7 +19,7 @@ Firefox with the GreaseMonkey extension, or Chrome with the Tampermonkey extensi
 The server uses erlichmen's py-bcrypt ([https://github.com/erlichmen/py-bcrypt][2])
 
 ###Home website:
-[https://udacityplus.appspot.com/main][1]
+[https://udacityplus.appspot.com][1]
 
 ###Planned/potential features:
 
@@ -36,5 +36,5 @@ The server uses erlichmen's py-bcrypt ([https://github.com/erlichmen/py-bcrypt][
 
 
 
-  [1]: https://udacityplus.appspot.com/main
+  [1]: https://udacityplus.appspot.com
   [2]: https://github.com/erlichmen/py-bcrypt

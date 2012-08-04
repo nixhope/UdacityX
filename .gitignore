@@ -4,3 +4,4 @@
 bcrypt
 appengine_config.*
 todo.*
+tests

@@ -14,12 +14,13 @@
 
 // @download      https://udacityplus.appspot.com/static/udacityplus.user.js
 
-// @version       0.1.1145
+// @version       0.1.1156
 
 // ==/UserScript==
 
 // Looking at the udacity.com html code there is already a bunch of material there
-// that was removed for launch
+// that was removed for launch. When they add these features it will make parts of U+ redundant
+// and of course U+ will need to be updated accordingly
 
 var path = String(window.location); // full url
 var host = window.location.host; // subdomain.domain.tld

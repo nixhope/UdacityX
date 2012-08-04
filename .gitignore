@@ -5,3 +5,5 @@ bcrypt
 appengine_config.*
 todo.*
 tests
+.*
+test.py

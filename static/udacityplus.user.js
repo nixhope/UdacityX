@@ -14,7 +14,7 @@
 
 // @download      https://udacityplus.appspot.com/static/udacityplus.user.js
 
-// @version       0.1.1143
+// @version       0.1.1145
 
 // ==/UserScript==
 
@@ -253,38 +253,58 @@ window.addEventListener("load", function(e) {
         // Create a <LI> for Udacity Plus Materials
         var uplus_materials_tab = tab_supplementary.parent().clone();
         uplus_materials_tab.addClass("udacity-plus");
-        var uplus_discussion_tab = uplus_materials_tab.clone();
+        var uplus_notes_tab = uplus_materials_tab.clone();
         
         // Clicking default tabs must remove the active state from U+ tabs
+        // and also hide U+ panels
         jQuery("a", jQuery("li.ui-state-default")).click(function(event){        
             jQuery("li.ui-state-default.udacity-plus").removeClass(
                 "ui-tabs-selected ui-state-active");
+            jQuery("div.udacity-plus.ui-tabs-panel").addClass("ui-tabs-hide");
         });
         
-        // Change text and link binding
-        jQuery("a", uplus_materials_tab).html("Udacity Plus Materials");
+        // Change text and link binding for U+ Materials
+        jQuery("a", uplus_materials_tab).html("U+ Materials");
         jQuery("a", uplus_materials_tab).attr("href", "#tab-uplus-materials");
         // Add tab:
         tab_supplementary.parent().after(uplus_materials_tab);
+        // Create a div area for the content
+        jQuery("div#tab-follow").after('<div id="tab-uplus-materials" '+
+            'class="ui-tabs-panel ui-widget-content ui-corner-bottom ui-tabs-hide udacity-plus">\n'+
+                '<div>\n'+
+                    '<span class="pretty-format"><p>Some sample materials here</p></span>\n'+
+                '</div>\n'+
+            '</div>\n')
         // Add click events:
         jQuery("a", uplus_materials_tab).click(function(event){
             event.preventDefault(); 
-            jQuery("li.ui-tabs-selected.ui-state-active"). // Deselects current active class
+            jQuery("li.ui-tabs-selected.ui-state-active"). // Deselects current active tab
                 removeClass("ui-tabs-selected ui-state-active");
+            jQuery("div.ui-tabs-panel").addClass("ui-tabs-hide"); // Hide all panels
             jQuery(uplus_materials_tab).addClass("ui-tabs-selected ui-state-active");
-        });
+            jQuery("div#tab-uplus-materials").removeClass("ui-tabs-hide"); // Show materials panel
+        });        
         
-        // Change text and link binding
-        jQuery("a", uplus_discussion_tab).html("Udacity Plus Discussion");
-        jQuery("a", uplus_discussion_tab).attr("href", "#tab-uplus-discussion");
+        // Change text and link binding for U+ Notes
+        jQuery("a", uplus_notes_tab).html("U+ Notes");
+        jQuery("a", uplus_notes_tab).attr("href", "#tab-uplus-notes");
         // Add tab:
-        jQuery(uplus_materials_tab).after(uplus_discussion_tab);
+        jQuery(uplus_materials_tab).after(uplus_notes_tab);
+        // Create a div area for the content
+        jQuery("div#tab-uplus-materials").after('<div id="tab-uplus-notes" '+
+            'class="ui-tabs-panel ui-widget-content ui-corner-bottom ui-tabs-hide udacity-plus">\n'+
+                '<div>\n'+
+                    '<span class="pretty-format"><p>Enter notes here</p></span>\n'+
+                '</div>\n'+
+            '</div>\n')
         // Add click events:
-        jQuery("a", uplus_discussion_tab).click(function(event){
+        jQuery("a", uplus_notes_tab).click(function(event){
             event.preventDefault(); 
-            jQuery("li.ui-tabs-selected.ui-state-active"). // Deselects current active class
+            jQuery("li.ui-tabs-selected.ui-state-active"). // Deselects current active tab
                 removeClass("ui-tabs-selected ui-state-active");
-            jQuery(uplus_discussion_tab).addClass("ui-tabs-selected ui-state-active");
+            jQuery("div.ui-tabs-panel").addClass("ui-tabs-hide"); // Hide all panels
+            jQuery(uplus_notes_tab).addClass("ui-tabs-selected ui-state-active");
+            jQuery("div#tab-uplus-notes").removeClass("ui-tabs-hide"); // Show notes panel
         });
     }
     

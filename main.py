@@ -10,6 +10,7 @@ from webapp2_extras.routes import RedirectRoute, PathPrefixRoute
 
 import articles
 import api
+from contents import panels
 
 class Main(Handler):
     def get(self):
@@ -37,8 +38,11 @@ app = webapp2.WSGIApplication(
             RedirectRoute('/articles/get', api.GetArticles, 'get-articles', strict_slash=True),
             RedirectRoute('/articles/upvote', api.UpVote, 'upvote-article', strict_slash=True),
             RedirectRoute('/articles/devote', api.DeVote, 'downvote-article', strict_slash=True),
+            RedirectRoute('/coursematerials/get', api.GetCourseMaterials, 'get-course-materials', strict_slash=True),
+            RedirectRoute('/coursematerials/set', api.MakeNote, 'make-note', strict_slash=True) # Testing only
         ]),
         RedirectRoute('/votes', articles.ListVotes, 'list-votes', strict_slash=True), # Testing only
+        RedirectRoute('/notes', panels.ListNotes, 'list-notes', strict_slash=True), # Testing only
     ], debug=True)
 app.error_handlers[404] = handle_404
 app.error_handlers[500] = handle_500

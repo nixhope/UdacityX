@@ -12,6 +12,8 @@ class Handler(webapp2.RequestHandler):
     jinja_env = jinja2.Environment(
         loader = jinja2.FileSystemLoader(template_dir),
         autoescape = True)
+    #logging.warning('%s'%self.request) # would be nice,
+    # but WSGIApplication doesn't instantiate until later
     
     def write(self, *a, **kw):
         '''Writes directly to the http request'''

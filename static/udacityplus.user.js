@@ -14,166 +14,272 @@
 
 // @download      https://udacityplus.appspot.com/static/udacityplus.user.js
 
-// @version       0.1.1156
+// @version       0.1.1325
 
 // ==/UserScript==
 
 // Looking at the udacity.com html code there is already a bunch of material there
-// that was removed for launch. When they add these features it will make parts of U+ redundant
-// and of course U+ will need to be updated accordingly
+// that was removed for launch
+
+
 
 var path = String(window.location); // full url
 var host = window.location.host; // subdomain.domain.tld
 
-// Create an overlay for articles
-var article_overlay_html = '<div class="udacity-plus" id="article-overlay"></div>';
-GM_addStyle("div.udacity-plus#article-overlay {"+
-    "display:none; "+
-    "position: absolute; "+ // absoulte creates an overlay
-    "margin-left: -1px; margin-top: 0px; z-index:100; "+
-    "background: #FFFFFF; border: solid 1px #1C78AA; "+
-    "font-size: 12px; "+
-    "color: black; "+
-    "width: 500px; height: 600px;} "+
-    "span.udacity-plus-score {color: #1C78AA; font-weight:bold;} "+
-    "a.udacity-plus-link {padding: 0px; border: none;} ");
+    if (host.indexOf("udacity.com") != -1) {
+    // Create an overlay for articles
+    var article_overlay_html = '<div class="udacity-plus" id="article-overlay"></div>';
+    GM_addStyle("div.udacity-plus#article-overlay {"+
+        "display:none; "+
+        "position: absolute; "+ // absoulte creates an overlay
+        "margin-left: -1px; margin-top: 0px; z-index:100; "+
+        "background: #FFFFFF; border: solid 1px #1C78AA; "+
+        "font-size: 12px; "+
+        "color: black; "+
+        "width: 500px; height: 600px;} "+
+        "span.udacity-plus-score {color: #1C78AA; font-weight:bold;} "+
+        "a.udacity-plus-link {padding: 0px; border: none;} ");
 
-GM_addStyle("a.uplus-upvote {"+
-    "font-size: 18px;"+
-    "border:2px solid #1C78AA;"+
-    "background: #FFF no-repeat 4px 5px;"+
-    "text-decoration: none;"+
-    "border-radius: 5px;"+
-    "}\n"+
-    "a.uplus-upvote:hover, a.uplus-upvote:focus, a.uplus-upvote.selected {"+
-    //"border:2px solid #000000;"+
-    "background: #00FF00;}");
-    
-// Function to set the content, both in the overlay, if already created,
-// and in the overlay filler html
-var setContent = function(content) {
-    if (typeof content !== "string") {
-        content = "<p>An error occurred retrieving the articles."+
-        "Please try again or contact the Udacity Plus author</p>";
-    }
-    article_overlay_html = '<div class="udacity-plus" id="article-overlay">'+content+'</div>';
-    jQuery("div.udacity-plus#article-overlay").html(content);    
-}
-
-// Articles should be cached for an hour
-// Get content (via ajax or from storage) and put it into the article overlay
-var retrieval = GM_getValue('udacity plus articles', false);
-if (retrieval) {
-    try {
-        var asJSON = JSON.parse(retrieval);
-        if ((asJSON["timestamp"] + 3600*1000) < new Date().getTime()) {
-            // Cache expires after 1 hour
-            retrieval = false;
-        } else {
-            setContent(asJSON["content"]);
+    // Set style of upvote buttons
+    GM_addStyle("a.uplus-upvote {"+
+        "font-size: 18px;"+
+        "border:2px solid #1C78AA;"+
+        "background: #FFF no-repeat 4px 5px;"+
+        "text-decoration: none;"+
+        "border-radius: 5px;"+
+        "}\n"+
+        "a.uplus-upvote:hover, a.uplus-upvote:focus, a.uplus-upvote.selected {"+
+        //"border:2px solid #000000;"+
+        "background: #00FF00;}");
+        
+    // Function to set the content, both in the overlay, if already created,
+    // and in the overlay filler html
+    function setContent(content) {
+        if (typeof content !== "string") {
+            content = "<p>An error occurred retrieving the articles."+
+            "Please try again or contact the Udacity Plus author</p>";
         }
-    } catch(e) {
-        // In case **** happens, e.g. corrupted cache
-        retrieval = false;
-    }    
-}
+        article_overlay_html = '<div class="udacity-plus" id="article-overlay">'+content+'</div>';
+        jQuery("div.udacity-plus#article-overlay").html(content);    
+    }
 
-// Retrieve user token and settings, if stored
-var local_data = GM_getValue("udacity plus settings", false);
-var settings = false;
-var token = false;
-if (local_data) {
-    local_data = JSON.parse(local_data);
-    if ("settings" in local_data) {
-        settings = local_data["settings"];
+    // Articles should be cached for an hour
+    // Get content (via ajax or from storage) and put it into the article overlay
+    var retrieval = GM_getValue('udacity plus articles', false);
+    if (retrieval) {
+        try {
+            var asJSON = JSON.parse(retrieval);
+            if ((asJSON["timestamp"] + 3600*1000) < new Date().getTime()) {
+                // Cache expires after 1 hour
+                retrieval = false;
+            } else {
+                setContent(asJSON["content"]);
+            }
+        } catch(e) {
+            // In case **** happens, e.g. corrupted cache
+            retrieval = false;
+        }    
+    }
+
+    // Retrieve user token and settings, if stored
+    var local_data = GM_getValue("udacity plus settings", false);
+    var settings = false;
+    var token = false;
+    if (local_data) {
+        local_data = JSON.parse(local_data);
+        if ("settings" in local_data) {
+            settings = local_data["settings"];
+        } else {
+            settings = {};
+        }
+        if ("token" in local_data) {
+            token = local_data["token"];
+        }
     } else {
         settings = {};
     }
-    if ("token" in local_data) {
-        token = local_data["token"];
+
+    function updateSettings() {
+        // Makes use of globals (token, settings)
+        var storage = {"token": token, "settings": settings};
+        GM_setValue('udacity plus settings', JSON.stringify(storage));
     }
-} else {
-    settings = {};
-}
 
-var updateSettings = function() {
-    // I know, globals are sub-ideal
-    var storage = {"token": token, "settings": settings};
-    GM_setValue('udacity plus settings', JSON.stringify(storage));
-}
-
-var upvote = function(link){
-    settings[link] = true;
-    GM_xmlhttpRequest({
-        method: "POST",
-        url: "https://udacityplus.appspot.com/api/articles/upvote",
-        data: "link="+link+"&token="+token,
-        headers: {
-            "Content-Type": "application/x-www-form-urlencoded"
-        },
-        onload: function(response) {    
-            response = JSON.parse(response.responseText); // Check that it worked            
-            console.log("Upvoted: "+link);
-            updateSettings();
-        }
-    });    
-}
-
-var devote = function(link){
-    settings[link] = false;
-    GM_xmlhttpRequest({
-        method: "POST",
-        url: "https://udacityplus.appspot.com/api/articles/devote",
-        data: "link="+link+"&token="+token,
-        headers: {
-            "Content-Type": "application/x-www-form-urlencoded"
-        },
-        onload: function(response) {
-            response = JSON.parse(response.responseText);
-            console.log(response["content"]); // Check that it worked
-            updateSettings();
-        }
-    });    
-}
-
-var isSelected = function(link){
-    if (link in settings && settings[link]) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
-// Retrieve articles from server
-if (!retrieval && host.indexOf("udacity.com") != -1) {
-    // Retrieve data via XHR
-    GM_xmlhttpRequest({
-        method: "POST",
-        url: "https://udacityplus.appspot.com/api/articles/get",
-        data: "token="+token,
-        headers: {
-            "Content-Type": "application/x-www-form-urlencoded"
-        },
-        onload: function(response) {        
-            var response = JSON.parse(response.responseText);
-            var content = response["content"]
-            if (!token || token !== response["token"]) {
-                token = response["token"];
+    function upvote(link){
+        settings[link] = true;
+        GM_xmlhttpRequest({
+            method: "POST",
+            url: "https://udacityplus.appspot.com/api/articles/upvote",
+            data: "link="+encodeURIComponent(link)+"&token="+encodeURIComponent(token),
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            onload: function(response) {    
+                response = JSON.parse(response.responseText); // Check that it worked            
+                //console.log("Upvoted: "+link);
                 updateSettings();
             }
-            var storage = {"content": content, "timestamp": new Date().getTime()};
-            GM_setValue('udacity plus articles', JSON.stringify(storage));
-            setContent(content);
+        });    
+    }
+
+    function devote(link){
+        settings[link] = false;
+        GM_xmlhttpRequest({
+            method: "POST",
+            url: "https://udacityplus.appspot.com/api/articles/devote",
+            data: "link="+encodeURIComponent(link)+"&token="+encodeURIComponent(token),
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            onload: function(response) {
+                response = JSON.parse(response.responseText);
+                //console.log(response["content"]); // Check that it worked
+                updateSettings();
+            }
+        });    
+    }
+
+    function isSelected(link){
+        if (link in settings && settings[link]) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    // Retrieve articles from server
+    if (!retrieval && host.indexOf("udacity.com") != -1) {
+        // Retrieve data via XHR
+        GM_xmlhttpRequest({
+            method: "POST",
+            url: "https://udacityplus.appspot.com/api/articles/get",
+            data: "token="+encodeURIComponent(token),
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            onload: function(response) {        
+                var response = JSON.parse(response.responseText);
+                var content = response["content"]
+                if (!token || token !== response["token"]) {
+                    token = response["token"];
+                    updateSettings();
+                }
+                var storage = {"content": content, "timestamp": new Date().getTime()};
+                GM_setValue('udacity plus articles', JSON.stringify(storage));
+                setContent(content);
+            }
+        });
+    }
+
+    // If clicking outside the article overlay, hide it
+    jQuery(document).mouseup(function (event) {
+        var container = jQuery("div.udacity-plus#article-overlay");
+        if (container.has(event.target).length === 0) {
+            container.hide();
         }
     });
-}
 
-jQuery(document).mouseup(function (event) {
-    var container = jQuery("div.udacity-plus#article-overlay");
-    if (container.has(event.target).length === 0) {
-        container.hide();
+    // MATERIALS section
+    var materialCache = GM_getValue('udacity plus materials', { });
+    var courseMaterial = { }; // associative array of notes for this course
+    var course = jQuery("span#top-course-title").text().trim();
+    /* Need to find a better way to obtain the course */
+    course = window.location.hash.substr(8, 5); // "#Course/cs253/"
+        
+    //materialCache = { }; // Clears cache for testing
+        
+    // Materials should be cached for an hour
+    // If cache empty or stale, retrieve via AJAX
+    if (materialCache !== { }) {
+        try {
+            materialCache = JSON.parse(materialCache);
+            if (course in materialCache) {
+                courseMaterial = asJSON[course];
+                if ((courseMaterial["timestamp"] + 3600*1000) < new Date().getTime()) {
+                    // Cache expires after 1 hour
+                    courseMaterial = false;
+                }
+            } else {
+                courseMaterial = false;
+            }
+        } catch(e) {
+            // In case **** happens, e.g. corrupted cache, or format change
+            courseMaterial = false;
+        }
     }
-});
+
+    // Retrieve materials from server
+    if (!courseMaterial && host.indexOf("udacity.com") != -1) {
+        // Retrieve data via XHR
+        GM_xmlhttpRequest({
+            method: "POST",
+            url: "https://udacityplus.appspot.com/api/coursematerials/get",
+            data: "token="+encodeURIComponent(token)+"&course="+encodeURIComponent(course),
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            onload: function(response) {        
+                var response = JSON.parse(response.responseText);            
+                courseMaterial = response["content"]
+                if (!token || token !== response["token"]) { // Update token
+                    token = response["token"];
+                    updateSettings();
+                }
+                // Cache material for this course
+                courseMaterial["timestamp"] = new Date().getTime();
+                materialCache[course] = courseMaterial
+                GM_setValue("udacity plus materials", JSON.stringify(materialCache));
+                // Add text to field by manually calling hashChanged();
+                hashChanged();
+            }
+        });
+    }
+
+    // Update material panel with content for this lesson
+    function setMaterialPanel(hashLink) {
+        var content = "<p>No extra material available for this lesson, why not add some using the U+ Notes feature?</p>";
+        if (typeof courseMaterial !== "object") {
+            content = "<p>An error was encountered while loading U+ Materials, please try again.</p>";
+        } else if (hashLink in courseMaterial) {
+            content = courseMaterial[hashLink];
+        }
+        jQuery("div#tab-uplus-materials").html(content);    
+    }
+
+    // NOTES section
+    var courseNotes = GM_getValue('udacity plus notes', { });
+    /*
+    // Update notes hashtable and store 
+    function updateNotes() {
+        // Globals (token, settings) are probably sub-ideal
+        var storage = {"token": token, "settings": settings};
+        GM_setValue('udacity plus settings', JSON.stringify(storage));
+    }
+
+    // Send notes to U+ server
+    function addNotes(link){
+        settings[link] = false;
+        GM_xmlhttpRequest({
+            method: "POST",
+            url: "https://udacityplus.appspot.com/api/articles/devote",
+            data: "link="+link+"&token="+token,
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            onload: function(response) {
+                response = JSON.parse(response.responseText);
+                console.log(response["content"]); // Check that it worked
+                updateSettings();
+            }
+        });    
+    }*/
+
+    // The hash (#) url changed, so try to load new nugget's materials
+    function hashChanged() {
+        var local_hash = window.location.hash;
+        setMaterialPanel(local_hash);
+    }
+} // End Udacity-only section
 
 // Wait for everything to be loaded
 window.addEventListener("load", function(e) {    
@@ -185,6 +291,9 @@ window.addEventListener("load", function(e) {
     
     // Site is udacity.com:
     if (host.indexOf("udacity.com") != -1) {        
+        // Detect if the local hash address has changed
+        window.onhashchange = hashChanged;
+        
         // Make the U+ additions more obvious
         GM_addStyle("li.udacity-plus {border: solid 1px #1C78AA;}");  
         
@@ -249,7 +358,7 @@ window.addEventListener("load", function(e) {
             });
         }
         
-        // SECTION materials    
+        // MATERIALS section 
         var tab_supplementary = jQuery('a[href="#tab-follow"]');
         // Create a <LI> for Udacity Plus Materials
         var uplus_materials_tab = tab_supplementary.parent().clone();
@@ -285,7 +394,11 @@ window.addEventListener("load", function(e) {
             jQuery(uplus_materials_tab).addClass("ui-tabs-selected ui-state-active");
             jQuery("div#tab-uplus-materials").removeClass("ui-tabs-hide"); // Show materials panel
         });        
+        // Add text to field by manually calling hashChanged();
+        hashChanged();
         
+        
+        // NOTES section
         // Change text and link binding for U+ Notes
         jQuery("a", uplus_notes_tab).html("U+ Notes");
         jQuery("a", uplus_notes_tab).attr("href", "#tab-uplus-notes");
@@ -295,10 +408,11 @@ window.addEventListener("load", function(e) {
         jQuery("div#tab-uplus-materials").after('<div id="tab-uplus-notes" '+
             'class="ui-tabs-panel ui-widget-content ui-corner-bottom ui-tabs-hide udacity-plus">\n'+
                 '<div>\n'+
-                    '<span class="pretty-format"><p>Enter notes here</p></span>\n'+
+                    '<p><textarea id="uplus-notes" rows="10" cols="120"></textarea></p>'+//'<span class="pretty-format"><p>Enter notes here</p></span>\n'+
+                    '<div class="button" id="uplus-notes-submit">Send to U+</div>'+//Testing/populating only
                 '</div>\n'+
             '</div>\n')
-        // Add click events:
+        // Add click events to tab:
         jQuery("a", uplus_notes_tab).click(function(event){
             event.preventDefault(); 
             jQuery("li.ui-tabs-selected.ui-state-active"). // Deselects current active tab
@@ -307,6 +421,25 @@ window.addEventListener("load", function(e) {
             jQuery(uplus_notes_tab).addClass("ui-tabs-selected ui-state-active");
             jQuery("div#tab-uplus-notes").removeClass("ui-tabs-hide"); // Show notes panel
         });
-    }
-    
+        // Add submit option for button
+        /*currently used for testing*/
+        jQuery("div#uplus-notes-submit").click(function(event){
+            event.preventDefault();
+            var content = jQuery("textarea#uplus-notes").val();
+            GM_xmlhttpRequest({
+                method: "POST",
+                url: "https://udacityplus.appspot.com/api/coursematerials/set",
+                data: "token="+encodeURIComponent(token)+"&course="+encodeURIComponent(course)+"&content="+encodeURIComponent(content)+
+                "&hash_link="+encodeURIComponent(window.location.hash),
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                onload: function(response) {        
+                    console.log("Sent notes to server: "+response.responseText);
+                }
+            });
+        });
+        
+        /* IMPLEMENT BROWSER CACHING ON HASH CHANGE */
+    }    
 }, false);

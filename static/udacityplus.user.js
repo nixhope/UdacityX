@@ -14,7 +14,7 @@
 
 // @download      https://udacityplus.appspot.com/static/udacityplus.user.js
 
-// @version       0.1.1332
+// @version       0.1.1333
 
 // ==/UserScript==
 
@@ -29,6 +29,8 @@
   - Provide a proper article feed
   - Create somewhere to easily edit materials and articles
   - Make stuff look good
+  - Change article to be of format {"link": link, "author": author, "description": description}.
+    That way all formatting can be done in-script.
 */
 
 var path = String(window.location); // full url
@@ -36,8 +38,8 @@ var host = window.location.host; // subdomain.domain.tld
 
     if (host.indexOf("udacity.com") != -1) {
     // Create an overlay for articles
-    var article_overlay_html = '<div class="udacity-plus" id="article-overlay"></div>';
-    GM_addStyle("div.udacity-plus#article-overlay {"+
+    var article_overlay_html = '<div class="uplus" id="article-overlay"></div>';
+    GM_addStyle("div.uplus#article-overlay {"+
         "padding: 5px !important;"+
         "display:none; "+
         "position: absolute; "+ // absoulte creates an overlay
@@ -46,9 +48,9 @@ var host = window.location.host; // subdomain.domain.tld
         "font-size: 12px; "+
         "color: black; "+
         "width: 500px; height: auto;} "+//height: 600px;} "+
-        "span.udacity-plus-score {color: #1C78AA; font-weight:bold;} "+
-        "div.udacity-plus-article {border: 1px solid gray; padding: 5px !important;} "+
-        "a.udacity-plus-link {color: #1C78AA; font-weight:bold;} ");
+        "span.uplus-score {color: #1C78AA; font-weight:bold;} "+
+        "div.uplus-article {border: 1px solid gray; padding: 5px !important;} "+
+        "a.uplus-link {color: #1C78AA; font-weight:bold;} ");
     // Set style of upvote buttons
     GM_addStyle("a.uplus-upvote {"+
         "font-size: 18px;"+
@@ -68,8 +70,8 @@ var host = window.location.host; // subdomain.domain.tld
             content = "<p>An error occurred retrieving the articles."+
             "Please try again or contact the Udacity Plus author</p>";
         }
-        article_overlay_html = '<div class="udacity-plus" id="article-overlay">'+content+'</div>';
-        jQuery("div.udacity-plus#article-overlay").html(content);    
+        article_overlay_html = '<div class="uplus" id="article-overlay">'+content+'</div>';
+        jQuery("div.uplus#article-overlay").html(content);    
     }
 
     // Articles should be cached for an hour
@@ -174,7 +176,7 @@ var host = window.location.host; // subdomain.domain.tld
                 var articles = response["content"]; // articles is an array
                 var content = "";
                 for (index in articles) {
-                    content += '<div class="udacity-plus-article">'+
+                    content += '<div class="uplus-article">'+
                         articles[index]+'</div>\n';
                 }
                 //console.log(content);
@@ -191,7 +193,7 @@ var host = window.location.host; // subdomain.domain.tld
 
     // If clicking outside the article overlay, hide it
     jQuery(document).mouseup(function (event) {
-        var container = jQuery("div.udacity-plus#article-overlay");
+        var container = jQuery("div.uplus#article-overlay");
         if (container.has(event.target).length === 0) {
             container.hide();
         }
@@ -313,21 +315,21 @@ window.addEventListener("load", function(e) {
         window.onhashchange = hashChanged;
         
         // Make the U+ additions more obvious
-        GM_addStyle("li.udacity-plus {border: solid 1px #1C78AA;}");  
+        GM_addStyle("li.uplus {border: solid 1px #1C78AA;}");  
         
         // SECTION articles    
         var progress_link = jQuery("li.topnav").last();        
         // Clicking default tabs must remove the active state from U+ tabs
         jQuery("a", jQuery("li.topnav")).click(function(event){        
-            jQuery("li.topnav.udacity-plus").removeClass("selected");
+            jQuery("li.topnav.uplus").removeClass("selected");
         });            
         // Create new topnav for articles
         var article_link = progress_link.clone();
         article_link.html('<a href="#">Articles</a>');//article_link.html('<a href="#article-overlay">Articles</a>');
-        article_link.addClass("udacity-plus");
+        article_link.addClass("uplus");
         progress_link.after(article_link);        
         article_link.after(article_overlay_html);
-        article_overlay = jQuery("div.udacity-plus#article-overlay");
+        article_overlay = jQuery("div.uplus#article-overlay");
         
         // Add click events:
         article_link.click(function(event){
@@ -382,15 +384,15 @@ window.addEventListener("load", function(e) {
         var tab_supplementary = jQuery('a[href="#tab-follow"]');
         // Create a <LI> for Udacity Plus Materials
         var uplus_materials_tab = tab_supplementary.parent().clone();
-        uplus_materials_tab.addClass("udacity-plus");
+        uplus_materials_tab.addClass("uplus");
         var uplus_notes_tab = uplus_materials_tab.clone();
         
         // Clicking default tabs must remove the active state from U+ tabs
         // and also hide U+ panels
         jQuery("a", jQuery("li.ui-state-default")).click(function(event){        
-            jQuery("li.ui-state-default.udacity-plus").removeClass(
+            jQuery("li.ui-state-default.uplus").removeClass(
                 "ui-tabs-selected ui-state-active");
-            jQuery("div.udacity-plus.ui-tabs-panel").addClass("ui-tabs-hide");
+            jQuery("div.uplus.ui-tabs-panel").addClass("ui-tabs-hide");
         });
         
         // Change text and link binding for U+ Materials
@@ -400,7 +402,7 @@ window.addEventListener("load", function(e) {
         tab_supplementary.parent().after(uplus_materials_tab);
         // Create a div area for the content
         jQuery("div#tab-follow").after('<div id="tab-uplus-materials" '+
-            'class="ui-tabs-panel ui-widget-content ui-corner-bottom ui-tabs-hide udacity-plus">\n'+
+            'class="ui-tabs-panel ui-widget-content ui-corner-bottom ui-tabs-hide uplus">\n'+
                 '<div>\n'+
                     '<span class="pretty-format"><p>Some sample materials here</p></span>\n'+
                 '</div>\n'+
@@ -426,7 +428,7 @@ window.addEventListener("load", function(e) {
         jQuery(uplus_materials_tab).after(uplus_notes_tab);
         // Create a div area for the content
         jQuery("div#tab-uplus-materials").after('<div id="tab-uplus-notes" '+
-            'class="ui-tabs-panel ui-widget-content ui-corner-bottom ui-tabs-hide udacity-plus">\n'+
+            'class="ui-tabs-panel ui-widget-content ui-corner-bottom ui-tabs-hide uplus">\n'+
                 '<div>\n'+
                     '<p><textarea id="uplus-notes" rows="8" cols="120"></textarea></p>'+//'<span class="pretty-format"><p>Enter notes here</p></span>\n'+
                     '<div class="button" id="uplus-notes-submit">Send to U+</div>'+//Testing/populating only

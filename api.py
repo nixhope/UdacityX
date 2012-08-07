@@ -107,7 +107,7 @@ class GetCourseMaterials(Handler):
         '''Retrieve course notes (nb: uses post due to token inclusion)'''
         logging.debug('%s'%self.request)
         course = urllib.unquote(self.request.get('course'))
-        content = urllib.unquote(panels.get_materials(course))
+        content = panels.get_materials(course)
         self.response.headers['Content-Type'] = 'application/json'
         id_token = urllib.unquote(self.request.get('token'))
         user = None

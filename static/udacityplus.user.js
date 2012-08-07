@@ -14,14 +14,22 @@
 
 // @download      https://udacityplus.appspot.com/static/udacityplus.user.js
 
-// @version       0.1.1325
+// @version       0.1.1332
 
 // ==/UserScript==
 
 // Looking at the udacity.com html code there is already a bunch of material there
 // that was removed for launch
 
-
+/*div.uplus-article{ border-bottom: 1px solid gray; }*/
+/*To do:
+  - Fix caching of materials
+  - Have notes go somewhere reasonable
+  - Cache notes (including on hashlink change)
+  - Provide a proper article feed
+  - Create somewhere to easily edit materials and articles
+  - Make stuff look good
+*/
 
 var path = String(window.location); // full url
 var host = window.location.host; // subdomain.domain.tld
@@ -30,16 +38,17 @@ var host = window.location.host; // subdomain.domain.tld
     // Create an overlay for articles
     var article_overlay_html = '<div class="udacity-plus" id="article-overlay"></div>';
     GM_addStyle("div.udacity-plus#article-overlay {"+
+        "padding: 5px !important;"+
         "display:none; "+
         "position: absolute; "+ // absoulte creates an overlay
-        "margin-left: -1px; margin-top: 0px; z-index:100; "+
+        "margin-left: 250px; margin-top: 22px; z-index:100; "+
         "background: #FFFFFF; border: solid 1px #1C78AA; "+
         "font-size: 12px; "+
         "color: black; "+
-        "width: 500px; height: 600px;} "+
+        "width: 500px; height: auto;} "+//height: 600px;} "+
         "span.udacity-plus-score {color: #1C78AA; font-weight:bold;} "+
-        "a.udacity-plus-link {padding: 0px; border: none;} ");
-
+        "div.udacity-plus-article {border: 1px solid gray; padding: 5px !important;} "+
+        "a.udacity-plus-link {color: #1C78AA; font-weight:bold;} ");
     // Set style of upvote buttons
     GM_addStyle("a.uplus-upvote {"+
         "font-size: 18px;"+
@@ -146,6 +155,8 @@ var host = window.location.host; // subdomain.domain.tld
             return false;
         }
     }
+    
+    retrieval = false; // Testing only
 
     // Retrieve articles from server
     if (!retrieval && host.indexOf("udacity.com") != -1) {
@@ -158,8 +169,15 @@ var host = window.location.host; // subdomain.domain.tld
                 "Content-Type": "application/x-www-form-urlencoded"
             },
             onload: function(response) {        
+                //console.log(response.responseText); // For testing
                 var response = JSON.parse(response.responseText);
-                var content = response["content"]
+                var articles = response["content"]; // articles is an array
+                var content = "";
+                for (index in articles) {
+                    content += '<div class="udacity-plus-article">'+
+                        articles[index]+'</div>\n';
+                }
+                //console.log(content);
                 if (!token || token !== response["token"]) {
                     token = response["token"];
                     updateSettings();
@@ -308,17 +326,19 @@ window.addEventListener("load", function(e) {
         article_link.html('<a href="#">Articles</a>');//article_link.html('<a href="#article-overlay">Articles</a>');
         article_link.addClass("udacity-plus");
         progress_link.after(article_link);        
-        article_link.append(article_overlay_html);
+        article_link.after(article_overlay_html);
         article_overlay = jQuery("div.udacity-plus#article-overlay");
         
         // Add click events:
         article_link.click(function(event){
             article_overlay.show();
+            return false;
         });       
         
         // Add U+ upvote functionality
         if (host.indexOf("forums.udacity.com") != -1) {
-            var insert = '<a class="uplus-upvote" href="#" title="Upvote on Udacity Plus! (Click again to undo)">&nbsp;+&nbsp;</a><br/>&nbsp;<br/>';
+            var insert = '<a class="uplus-upvote" href="#"'+
+                'title="Upvote on Udacity Plus! (Click again to undo)">&nbsp;+&nbsp;</a><br/>&nbsp;<br/>';
             var questionUpVote = jQuery(insert); // Create a new DOM element
             jQuery("div#favorite-count").after(questionUpVote);
             if (isSelected(path)) {
@@ -408,7 +428,7 @@ window.addEventListener("load", function(e) {
         jQuery("div#tab-uplus-materials").after('<div id="tab-uplus-notes" '+
             'class="ui-tabs-panel ui-widget-content ui-corner-bottom ui-tabs-hide udacity-plus">\n'+
                 '<div>\n'+
-                    '<p><textarea id="uplus-notes" rows="10" cols="120"></textarea></p>'+//'<span class="pretty-format"><p>Enter notes here</p></span>\n'+
+                    '<p><textarea id="uplus-notes" rows="8" cols="120"></textarea></p>'+//'<span class="pretty-format"><p>Enter notes here</p></span>\n'+
                     '<div class="button" id="uplus-notes-submit">Send to U+</div>'+//Testing/populating only
                 '</div>\n'+
             '</div>\n')

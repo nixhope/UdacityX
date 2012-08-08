@@ -14,7 +14,7 @@
 
 // @download      https://udacityplus.appspot.com/static/udacityplus.user.js
 
-// @version       0.1.1333
+// @version       0.1.1351
 
 // ==/UserScript==
 
@@ -25,18 +25,19 @@
 /*To do:
   - Fix caching of materials
   - Have notes go somewhere reasonable
-  - Cache notes (including on hashlink change)
   - Provide a proper article feed
   - Create somewhere to easily edit materials and articles
   - Make stuff look good
   - Change article to be of format {"link": link, "author": author, "description": description}.
-    That way all formatting can be done in-script.
+    That way all article formatting can be done in-script straight from datastore feed.
+  - Consider removing the course subcategory from materials to bring it in line with notes.
+    Will mean more bandwidth used when pulling materials from server, so prefer not to.
 */
 
 var path = String(window.location); // full url
 var host = window.location.host; // subdomain.domain.tld
 
-    if (host.indexOf("udacity.com") != -1) {
+if (host.indexOf("udacity.com") != -1) {
     // Create an overlay for articles
     var article_overlay_html = '<div class="uplus" id="article-overlay"></div>';
     GM_addStyle("div.uplus#article-overlay {"+
@@ -265,40 +266,64 @@ var host = window.location.host; // subdomain.domain.tld
         }
         jQuery("div#tab-uplus-materials").html(content);    
     }
-
+    
     // NOTES section
-    var courseNotes = GM_getValue('udacity plus notes', { });
-    /*
-    // Update notes hashtable and store 
-    function updateNotes() {
-        // Globals (token, settings) are probably sub-ideal
-        var storage = {"token": token, "settings": settings};
-        GM_setValue('udacity plus settings', JSON.stringify(storage));
+    var allNotes = JSON.parse(GM_getValue("udacity plus notes", "{ }")); // This collects notes for every course
+    
+    // Save the notes
+    function saveNotes() {        
+        // Get the current notes
+        var currentNotes = jQuery("textarea#uplus-notes").val();
+        // Get the link these notes are for
+        var oldHash = jQuery("textarea#uplus-notes").attr("name");
+        if (oldHash) {
+            if (oldHash in allNotes && allNotes[oldHash] != currentNotes) {
+                // New notes overwrite existing notes
+                allNotes[oldHash] = currentNotes;
+                // Store notes dict locally
+                GM_setValue("udacity plus notes", JSON.stringify(allNotes));
+            } else if (currentNotes.length > 0) {
+                // Create new (nonblank) entry in allNotes
+                allNotes[oldHash] = currentNotes;
+                // Store notes dict locally
+                GM_setValue("udacity plus notes", JSON.stringify(allNotes));
+            } // The checks above prevent unneccessary storing
+        }        
     }
-
-    // Send notes to U+ server
-    function addNotes(link){
-        settings[link] = false;
-        GM_xmlhttpRequest({
-            method: "POST",
-            url: "https://udacityplus.appspot.com/api/articles/devote",
-            data: "link="+link+"&token="+token,
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded"
-            },
-            onload: function(response) {
-                response = JSON.parse(response.responseText);
-                console.log(response["content"]); // Check that it worked
-                updateSettings();
-            }
-        });    
-    }*/
+    
+    // Clear saved notes for a given hash
+    function clearNotes() {
+        var currentHash = jQuery("textarea#uplus-notes").attr("name");
+        // Ensure hash is currently in notes (otherwise we get an error)
+        if (currentHash in allNotes) {
+            delete allNotes[currentHash];
+            GM_setValue("udacity plus notes", JSON.stringify(allNotes));
+        }
+        jQuery("textarea#uplus-notes").val("");
+    }
 
     // The hash (#) url changed, so try to load new nugget's materials
     function hashChanged() {
-        var local_hash = window.location.hash;
-        setMaterialPanel(local_hash);
+        var localHash = window.location.hash;
+        // Update materials
+        setMaterialPanel(localHash);        
+        // Save any notes made
+        saveNotes();
+        // Update the notes from cache for the new hash
+        if (localHash in allNotes) {
+            jQuery("textarea#uplus-notes").val(allNotes[localHash]);
+        } else {
+            jQuery("textarea#uplus-notes").val(""); // Default text
+        }
+        // Store the new hash in the textarea as the name for future reference
+        jQuery("textarea#uplus-notes").attr("name", localHash);
     }
+    
+    // Ensure notes are saved when leaving the page
+    jQuery(window).unload(function(event) {
+        saveNotes();
+    });
+    
 } // End Udacity-only section
 
 // Wait for everything to be loaded
@@ -417,8 +442,7 @@ window.addEventListener("load", function(e) {
             jQuery("div#tab-uplus-materials").removeClass("ui-tabs-hide"); // Show materials panel
         });        
         // Add text to field by manually calling hashChanged();
-        hashChanged();
-        
+        hashChanged();        
         
         // NOTES section
         // Change text and link binding for U+ Notes
@@ -431,7 +455,8 @@ window.addEventListener("load", function(e) {
             'class="ui-tabs-panel ui-widget-content ui-corner-bottom ui-tabs-hide uplus">\n'+
                 '<div>\n'+
                     '<p><textarea id="uplus-notes" rows="8" cols="120"></textarea></p>'+//'<span class="pretty-format"><p>Enter notes here</p></span>\n'+
-                    '<div class="button" id="uplus-notes-submit">Send to U+</div>'+//Testing/populating only
+                    '<div class="button" id="uplus-notes-submit" title="Contribute your notes to the U+ materials pool">Send to U+</div>\n'+//Testing/populating only
+                    '<div class="button" id="uplus-notes-clear" title="Clear your saved notes (irreversible)">Clear notes</div>'+
                 '</div>\n'+
             '</div>\n')
         // Add click events to tab:
@@ -461,7 +486,9 @@ window.addEventListener("load", function(e) {
                 }
             });
         });
-        
-        /* IMPLEMENT BROWSER CACHING ON HASH CHANGE */
+        // Enable clearing of notes
+        jQuery("div#uplus-notes-clear").click(function(event){
+            clearNotes();
+        });
     }    
 }, false);

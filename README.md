@@ -7,11 +7,7 @@ Good question, Neo. Udacity Plus is a third party userscript that provides extra
 
 Currently it offers an article link at the top of the page where you can read student articles.
 
-It also creates extra buttons on the Udacity forums to allow you to upvote specific questions and answers to nominate them to article status.
-
-###That's it?
-
-Well, it's the future that's interesting. There will be extra tabs with bonus material for select lecture videos. And hopefully a space to take your own notes.
+It also creates extra buttons on the Udacity forums to allow you to upvote specific questions and answers to nominate them to article status. U+ additionally adds extra tabs at the bottom of lesson videos, providing extra material contributed by U+ users, and a space to write your own notes.
 
 ###Requirements:
 
@@ -29,9 +25,7 @@ The server uses erlichmen's py-bcrypt ([https://github.com/erlichmen/py-bcrypt][
   - Articles
   - Hot topics
 - Extra tabs for class videos:
-  - Supplementary material
   - Discussions
-  - Space to take notes
 - Integration with other projects
 
 

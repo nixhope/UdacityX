@@ -2,8 +2,7 @@
 <html lang="en">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <link type="text/css" rel="stylesheet" href="/static/main.css" />
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+    <link type="text/css" rel="stylesheet" href="/static/main.css" />    
     <title>{% block title %}Home{% endblock %} - Udacity Plus</title>
     {% block head %}	
     {% endblock %}    
@@ -11,22 +10,6 @@
 
 <body>
 <div class="content"><div class="main-title"><h1>Udacity Plus</h1></div>{% block content %}
-<script type="text/javascript">
-$(document).ready(function(){
-    jQuery("a#show-screenshot").click(function(event){
-        event.preventDefault();
-    jQuery("a#show-screenshot").hide();
-        jQuery("div#image-hider").show();
-    jQuery("a#hide-screenshot").show();
-    });    
-    jQuery("a#hide-screenshot").click(function(event){
-        event.preventDefault();
-    jQuery("a#hide-screenshot").hide();
-        jQuery("div#image-hider").hide();
-    jQuery("a#show-screenshot").show();
-    });    
-});
-</script>
 <h3>What is Udacity Plus?</h3>
 <p>Good question, Neo.<br/>
 Udacity Plus is a third party userscript that provides extra functionality for the <a href="http://en.wikipedia.org/wiki/Massive_open_online_course" title="Massive Open Online Course">MOOC</a> website <a href="http://www.udacity.com">Udacity</a>.</p>
@@ -34,6 +17,7 @@ Udacity Plus is a third party userscript that provides extra functionality for t
 <h3>What kind of extra functionality?</h3>
 <p>Currently it offers an article link at the top of the page where you can read student articles.</p>
 <p>It also creates extra buttons on the Udacity forums to allow you to upvote specific questions and answers to nominate them to article status.</p>
+<p>U+ additionally adds extra tabs at the bottom of lesson videos, providing extra material contributed by U+ users, and a space to write your own notes.</p>
 <p><a id="show-screenshot" href="">Click to show screenshots</a><a id="hide-screenshot" href="">Click to hide screenshots</a>.</p>
 <div id="image-hider"><p>Screenshot #1:<br/><img src="static/udacity_plus_screenshot.png" width="620" height="440"><br/>This image shows the article overlay.
 Articles will be dynamically produced based on community upvotes.</p><hr/>
@@ -41,9 +25,6 @@ Articles will be dynamically produced based on community upvotes.</p><hr/>
 This image shows the U+ upvote button which the script adds to the forums.</p><hr/>
 <p>Screenshot #3:<br/><img src="static/udacity_plus_screenshot3.png" width="620" height="354"><br/>
 This image shows the clicked upvote button. Upvotes are collated and form the basis of the articles shown users.</div>
-
-<h3>That's it?</h3>
-<p>Well, it's the future that's interesting. There will be extra tabs with bonus material for select lecture videos. And hopefully a space to take your own notes.</p>
 
 <h3>Fine, let me try it</h3>
 <p>You'll need Firefox with the GreaseMonkey extension, or Chrome with the Tampermonkey extension. Click the green button to install.</p>
@@ -63,9 +44,7 @@ This image shows the clicked upvote button. Upvotes are collated and form the ba
     </ul>
     <li>Extra tabs for class videos:</li>
     <ul>
-        <li>Supplementary material</li>
         <li>Discussions</li>
-        <li>Space to take notes</li>
     </ul>
     <li>Integration with other projects</li>
 </ul>
@@ -74,5 +53,23 @@ This image shows the clicked upvote button. Upvotes are collated and form the ba
 {% endblock %}
 </div>
 </body>
-
+<footer>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+    jQuery("a#show-screenshot").click(function(event){
+        event.preventDefault();
+    jQuery("a#show-screenshot").hide();
+        jQuery("div#image-hider").show();
+    jQuery("a#hide-screenshot").show();
+    });    
+    jQuery("a#hide-screenshot").click(function(event){
+        event.preventDefault();
+    jQuery("a#hide-screenshot").hide();
+        jQuery("div#image-hider").hide();
+    jQuery("a#show-screenshot").show();
+    });    
+});
+</script>
+</footer>
 </html>

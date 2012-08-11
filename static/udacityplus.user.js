@@ -32,6 +32,7 @@
     That way all article formatting can be done in-script straight from datastore feed.
   - Consider removing the course subcategory from materials to bring it in line with notes.
     Will mean more bandwidth used when pulling materials from server, so prefer not to.
+  - Add a version check function
 */
 
 var path = String(window.location); // full url
